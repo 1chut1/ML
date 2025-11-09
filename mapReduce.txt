@@ -1,0 +1,18 @@
+# 1. Define Map and Reduce Functions
+var mapFunction = function() {
+  emit(this.cust_id, this.amount);
+};
+
+var reduceFunction = function(keyCustId, valuesAmount) {
+  return Array.sum(valuesAmount);
+};
+
+# 2. Execute Map-Reduce
+db.sales_data.mapReduce(
+  mapFunction,
+  reduceFunction,
+  { out: "sales_totals" }
+)
+
+# 3. View the Results
+db.sales_totals.find().pretty()
