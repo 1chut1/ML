@@ -1,0 +1,17 @@
+# 1. Projection: Convert customer IDs to uppercase and show only selected fields
+db.sales_data.aggregate([
+  { $project: { _id: 0, CUST_ID: { $toUpper: "$cust_id" }, AMOUNT: 1 } },
+  { $sort: { CUST_ID: 1 } }
+])
+
+# 2. Add computed field (Month from Date)
+db.sales_data.aggregate([
+  { $project: { cust_id: 1, month: { $month: "$date" }, amount: 1 } },
+  { $sort: { month: 1 } }
+])
+
+# 3. Group by Region — Total Sales and Average Sale
+db.sales_data.aggregate([
+  { $group: { _id: "$region", total_sales: { $sum: "$amount" }, avg_sales: { $avg: "$amount" } } },
+  { $sort: { total_sales: -1 } }
+])
