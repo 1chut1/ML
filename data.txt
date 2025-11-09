@@ -1,0 +1,18 @@
+# ---------------------------------------------
+# Step 1: Create and Select Database
+# ---------------------------------------------
+use analytics_db
+
+# ---------------------------------------------
+# Step 2: Create Collection and Insert Sample Data
+# ---------------------------------------------
+db.createCollection("sales_data")
+
+db.sales_data.insertMany([
+  { cust_id: "C001", date: new Date("2024-03-15"), amount: 2500, region: "North" },
+  { cust_id: "C002", date: new Date("2024-03-16"), amount: 1800, region: "South" },
+  { cust_id: "C001", date: new Date("2024-03-17"), amount: 3200, region: "North" },
+  { cust_id: "C003", date: new Date("2024-03-18"), amount: 2900, region: "West" },
+  { cust_id: "C002", date: new Date("2024-03-19"), amount: 2100, region: "South" },
+  { cust_id: "C004", date: new Date("2024-03-20"), amount: 4000, region: "East" }
+])
