@@ -1,344 +1,216 @@
-# 🧠 Advanced Database Management Systems (ADBMS) — MongoDB Practicals
+# 🧠 Advanced Database Management Systems (ADBMS) — MongoDB Practicals (Theoretical Notes)
 
 ---
 
 ## 🧩 Practical 1 — CRUD Operations and Querying in MongoDB
 
 ### 🎯 **Aim**
-Create a MongoDB database with a suitable example and implement:
-- Inserting and saving documents (batch insert, insert validation)
-- Removing documents
-- Updating documents (replacement, modifiers, upserts)
-- Demonstrating query criteria and cursor operations
+To create and manage a MongoDB database by performing **basic CRUD operations**:
+- Insertion and saving of documents
+- Deletion and updating of records
+- Querying data using various conditions and cursor operations
 
 ---
 
-### ⚙️ **Concept Overview**
+### 📘 **Theory**
 
-MongoDB is a **NoSQL document-based** database that stores data as **BSON (Binary JSON)**.  
-It is schema-less, scalable, and optimized for unstructured data.
+MongoDB is a **NoSQL document-oriented database** that stores data in the form of **collections** and **documents** rather than tables and rows.
 
-| Operation | Description | Equivalent SQL |
-|------------|--------------|----------------|
-| `insertOne()`, `insertMany()` | Add new documents | `INSERT INTO` |
-| `find()`, `findOne()` | Retrieve documents | `SELECT * FROM` |
-| `updateOne()`, `updateMany()` | Modify existing documents | `UPDATE SET` |
-| `deleteOne()`, `deleteMany()` | Remove documents | `DELETE FROM` |
+- A **collection** is similar to a table in SQL.  
+- A **document** is analogous to a record and is stored in **BSON (Binary JSON)** format.
 
----
+#### **1. CRUD Operations Overview**
+CRUD stands for:
+- **Create** → Adding documents to a collection  
+- **Read** → Retrieving documents from a collection  
+- **Update** → Modifying existing documents  
+- **Delete** → Removing documents from a collection  
 
-### 💻 **Implementation**
+Each of these operations corresponds to familiar SQL operations but with far greater flexibility in MongoDB since schema enforcement is optional.
 
-#### Step 1: Create Database and Collection
-```bash
-use college_db
-db.createCollection("teacher_info")
-````
+#### **2. Data Model**
+MongoDB is **schema-less**, meaning:
+- Each document can have a different structure.
+- Fields can be added dynamically.
+- Relationships between data are often represented using **embedding** or **referencing**.
 
-#### Step 2: Insert (Batch Insert)
+#### **3. Query Operators**
+MongoDB provides operators for flexible filtering:
+- **Comparison:** `$eq`, `$ne`, `$gt`, `$lt`, `$gte`, `$lte`  
+- **Logical:** `$or`, `$and`, `$not`  
+- **Element:** `$exists`, `$type`  
+- **Regex:** Pattern matching using regular expressions  
 
-```bash
-db.teacher_info.insertMany([
-  {teacher_id: "T001", teacher_name: "Priyanka", dept_name: "IT", status: "A", sal: 45000},
-  {teacher_id: "T002", teacher_name: "Pradnya", dept_name: "IT", status: "A", sal: 40000},
-  {teacher_id: "T003", teacher_name: "Seema", dept_name: "IT", status: "N", sal: 30000}
-])
-```
+#### **4. Cursor Operations**
+When performing `find()` operations, MongoDB returns a **cursor** — a pointer to the result set.  
+Common cursor methods:
+- `limit(n)` → restricts number of results
+- `skip(n)` → skips specific documents
+- `sort({field: 1 or -1})` → sorts data ascending or descending  
 
-#### Step 3: Find and FindOne
-
-```bash
-db.teacher_info.find().pretty()
-db.teacher_info.findOne({teacher_name: "Priyanka"})
-```
-
-#### Step 4: Update Operations
-
-```bash
-# Update one document
-db.teacher_info.updateOne({teacher_id: "T003"}, {$set: {dept_name: "ETC"}})
-
-# Update multiple documents using a modifier
-db.teacher_info.updateMany({status: "A"}, {$inc: {sal: 5000}})
-
-# Upsert example (insert if not found)
-db.teacher_info.updateOne(
-  {teacher_id: "T010"},
-  {$set: {teacher_name: "Neha", dept_name: "MECH", status: "A", sal: 32000}},
-  {upsert: true}
-)
-```
-
-#### Step 5: Remove Documents
-
-```bash
-db.teacher_info.deleteOne({teacher_id: "T003"})
-```
-
-#### Step 6: Query Demonstrations
-
-```bash
-# 1. Retrieve all records
-db.teacher_info.find()
-
-# 2. Conditional queries
-db.teacher_info.find({sal: {$gt: 40000}})
-db.teacher_info.find({sal: {$lt: 40000, $ne: 25000}})
-
-# 3. OR / NOT operators
-db.teacher_info.find({$or: [{status: "A"}, {dept_name: "COMP"}]})
-db.teacher_info.find({sal: {$not: {$gt: 40000}}})
-
-# 4. Regex query
-db.teacher_info.find({teacher_name: {$regex: /^P/}})
-
-# 5. Cursor operations
-db.teacher_info.find().sort({sal: -1}).limit(2)
-db.teacher_info.find().skip(1).limit(2)
-```
+#### **5. Use Cases**
+CRUD operations are foundational in every MongoDB application:
+- Data ingestion
+- Simple analytics
+- Application backends for dynamic data
+- Logging or configuration databases
 
 ---
 
-### 📊 **Result Summary**
-
-| Operation | Method Used                        | Purpose                            |
-| --------- | ---------------------------------- | ---------------------------------- |
-| Insert    | `insertMany()`                     | Batch document insertion           |
-| Update    | `$set`, `$inc`                     | Modify fields and increment salary |
-| Delete    | `deleteOne()`                      | Remove specific documents          |
-| Query     | `$gt`, `$lt`, `$ne`, `$or`, `$not` | Conditional filters                |
-| Cursor    | `limit()`, `sort()`, `skip()`      | Control result display             |
-
----
-
-### ✅ **Conclusion**
-
-CRUD operations were successfully implemented.
-MongoDB efficiently handled insertion, update, deletion, and querying of documents with flexible filters and cursors.
+### 📗 **Conclusion**
+MongoDB’s CRUD operations provide flexibility for schema-less data manipulation.  
+Through simple commands and operators, complex queries can be performed efficiently without rigid table structures, making MongoDB suitable for modern web and analytics applications.
 
 ---
 
 ## 🧩 Practical 2 — Aggregation Framework and Indexing
 
 ### 🎯 **Aim**
-
-Implement the Aggregation Framework and demonstrate creation and deletion of indexes with performance comparison.
-
----
-
-### ⚙️ **Concept Overview**
-
-* **Aggregation Framework**: Processes multiple documents and returns computed results using stages such as `$match`, `$group`, `$project`, `$sort`, and `$sum`.
-* **Indexes**: Improve query performance by allowing MongoDB to search data faster, reducing collection scans.
+To study and implement **MongoDB’s Aggregation Framework** and **Indexing techniques** to summarize, transform, and optimize database queries.
 
 ---
 
-### 💻 **Implementation**
+### 📘 **Theory**
 
-#### Step 1: Create Database and Collection
+#### **1. Aggregation Framework**
+Aggregation in MongoDB is analogous to **SQL’s GROUP BY** with more flexibility.  
+It allows processing of data through a **pipeline**, where each stage transforms the documents and passes the results to the next stage.
 
-```bash
-use sports_club_db
-db.createCollection("users")
-```
+##### **Key Aggregation Stages**
+| Stage | Description |
+|--------|--------------|
+| `$match` | Filters documents (similar to `WHERE`) |
+| `$group` | Groups documents by field(s) and performs aggregation operations (`$sum`, `$avg`, `$max`, `$min`) |
+| `$project` | Reshapes documents, includes or excludes fields |
+| `$sort` | Orders documents based on one or more fields |
+| `$limit` and `$skip` | Restricts and paginates output |
+| `$lookup` | Performs joins between collections |
+| `$count` | Counts documents after filters |
 
-#### Step 2: Insert Data
+##### **Example Use-Cases**
+- Finding total sales per region  
+- Counting users joined per month  
+- Computing average or maximum values  
 
-```bash
-db.users.insertMany([
-  { name: "Aarav", join_date: new Date("2024-01-15"), sport: "Cricket" },
-  { name: "Bhavna", join_date: new Date("2024-02-10"), sport: "Badminton" },
-  { name: "Chirag", join_date: new Date("2024-02-22"), sport: "Football" },
-  { name: "Deepika", join_date: new Date("2024-03-01"), sport: "Tennis" },
-  { name: "Esha", join_date: new Date("2024-01-25"), sport: "Cricket" }
-])
-```
-
-#### Step 3: Aggregation Examples
-
-```bash
-# 1. Project and Sort
-db.users.aggregate([
-  { $project: { _id: 0, UPPER_NAME: { $toUpper: "$name" } } },
-  { $sort: { UPPER_NAME: 1 } }
-])
-
-# 2. Add Computed Field (Month)
-db.users.aggregate([
-  { $project: { name: 1, monthJoined: { $month: "$join_date" } } },
-  { $sort: { monthJoined: 1 } }
-])
-
-# 3. Group by Month
-db.users.aggregate([
-  { $group: { _id: { month: { $month: "$join_date" } }, total_joined: { $sum: 1 } } },
-  { $sort: { "_id.month": 1 } }
-])
-```
-
-#### Step 4: Index Creation and Demonstration
-
-```bash
-# Create index
-db.users.createIndex({ name: 1 })
-
-# List indexes
-db.users.getIndexes()
-
-# Demonstrate index advantage
-db.users.find({ name: "Aarav" }).explain("executionStats")
-
-# Drop index
-db.users.dropIndex({ name: 1 })
-```
+The **aggregation pipeline** is powerful because:
+- It’s optimized internally for performance.
+- It can replace Map-Reduce in most modern use cases.
 
 ---
 
-### 📊 **Result Summary**
+#### **2. Indexing in MongoDB**
 
-| Concept      | Example                      | Description               |
-| ------------ | ---------------------------- | ------------------------- |
-| Aggregation  | `$project`, `$group`, `$sum` | Summarization of data     |
-| Indexing     | `createIndex()`              | Faster queries            |
-| Explain Plan | `.explain("executionStats")` | Query performance insight |
+**Indexing** improves query performance by creating a data structure that allows MongoDB to locate documents quickly rather than scanning the entire collection.
+
+##### **Types of Indexes**
+| Index Type | Description |
+|-------------|--------------|
+| **Single Field Index** | Created on one field; speeds up queries filtering that field. |
+| **Compound Index** | Created on multiple fields; efficient for multi-criteria queries. |
+| **Text Index** | Supports text search within string fields. |
+| **Hashed Index** | Enables sharding and distributed data access. |
+
+##### **Advantages of Indexes**
+- Reduces query execution time.
+- Minimizes the number of documents scanned.
+- Enables efficient sorting and range queries.
+- Supports uniqueness enforcement.
+
+##### **Disadvantages**
+- Requires additional disk space.
+- Slows down insert/update operations slightly because indexes must be updated.
+
+##### **Explain Plan**
+MongoDB provides `.explain("executionStats")` to analyze query efficiency.  
+- **Without Index:** Collection scan (`COLLSCAN`)  
+- **With Index:** Index scan (`IXSCAN`) — faster and optimized  
 
 ---
 
-### ✅ **Conclusion**
-
-The experiment successfully demonstrated MongoDB’s Aggregation Framework for data summarization and the significant performance gain from indexing.
+### 📗 **Conclusion**
+The aggregation framework simplifies data transformation and summarization, while indexing ensures efficient data retrieval.  
+Together, they form the core of MongoDB’s performance-oriented architecture, enabling fast analytical and transactional processing.
 
 ---
 
 ## 🧩 Practical 3 — Map-Reduce and Advanced Aggregation
 
 ### 🎯 **Aim**
-
-Implement Map-Reduce and Aggregation in MongoDB and demonstrate the use of indexes with examples.
-
----
-
-### ⚙️ **Concept Overview**
-
-* **Map-Reduce**: Processes large volumes of data by mapping key-value pairs and reducing them to aggregated results.
-* **Aggregation**: A modern and optimized alternative to Map-Reduce.
-* **Indexing**: Improves performance of frequent query operations.
+To implement **Map-Reduce** and **Aggregation operations** in MongoDB and demonstrate indexing benefits.
 
 ---
 
-### 💻 **Implementation**
+### 📘 **Theory**
 
-#### Step 1: Create Database and Collection
+#### **1. Map-Reduce Concept**
 
-```bash
-use sales_db
-db.createCollection("orders")
-```
+Map-Reduce is a **programming paradigm** for processing large datasets.  
+It consists of two main steps:
+- **Map phase:** Processes each document and emits a key-value pair.
+- **Reduce phase:** Aggregates values with the same key to compute a final result.
 
-#### Step 2: Insert Documents
+##### **Working Mechanism**
+1. **Map Function:**  
+   Extracts key-value pairs from each document.  
+   Example: `{cust_id: "C001", amount: 2000}` → emit(`C001`, 2000)
+2. **Reduce Function:**  
+   Aggregates all emitted values for each key, e.g., total purchase amount per customer.
+3. **Output Collection:**  
+   The results are stored in a new collection for further use.
 
-```bash
-db.orders.insertMany([
-  { cust_id: "C001", ord_date: new Date("2024-03-15"), price: 2500 },
-  { cust_id: "C002", ord_date: new Date("2024-03-16"), price: 1800 },
-  { cust_id: "C001", ord_date: new Date("2024-03-17"), price: 3200 },
-  { cust_id: "C003", ord_date: new Date("2024-03-18"), price: 2900 },
-  { cust_id: "C002", ord_date: new Date("2024-03-19"), price: 2100 }
-])
-```
+##### **Advantages**
+- Handles large-scale data (parallelizable)
+- Highly customizable aggregation logic
+- Suitable for batch analytics
 
-#### Step 3: Implement Map-Reduce
-
-```bash
-var mapFunction = function() {
-  emit(this.cust_id, this.price);
-};
-
-var reduceFunction = function(keyCustId, valuesPrices) {
-  return Array.sum(valuesPrices);
-};
-
-db.orders.mapReduce(
-  mapFunction,
-  reduceFunction,
-  { out: "total_sales" }
-)
-
-db.total_sales.find().pretty()
-```
-
-**Output Example:**
-
-```
-{ _id: 'C001', value: 5700 }
-{ _id: 'C002', value: 3900 }
-{ _id: 'C003', value: 2900 }
-```
-
-#### Step 4: Aggregation Comparison
-
-```bash
-db.orders.aggregate([
-  { $group: { _id: "$cust_id", total_sales: { $sum: "$price" } } },
-  { $sort: { total_sales: -1 } }
-])
-```
-
-#### Step 5: Indexing
-
-```bash
-# Create index
-db.orders.createIndex({ cust_id: 1 })
-
-# Check index usage
-db.orders.find({ cust_id: "C001" }).explain("executionStats")
-
-# Drop index
-db.orders.dropIndex({ cust_id: 1 })
-```
+##### **Disadvantages**
+- Slower than Aggregation Pipeline
+- Deprecated in modern MongoDB versions (replaced by `$group`, `$accumulator`, etc.)
 
 ---
 
-### 📊 **Result Summary**
+#### **2. Aggregation Framework vs. Map-Reduce**
 
-| Operation   | Example                       | Purpose                      |
-| ----------- | ----------------------------- | ---------------------------- |
-| Map-Reduce  | `emit()`, `Array.sum()`       | Aggregates data by key       |
-| Aggregation | `$group`, `$sort`             | Pipeline-based summarization |
-| Indexing    | `createIndex()`, `.explain()` | Performance improvement      |
+| Feature | Aggregation Framework | Map-Reduce |
+|----------|------------------------|------------|
+| Execution Model | Pipeline-based | JavaScript-based functions |
+| Performance | Faster and optimized | Slower (interpreted JS) |
+| Use Case | Most data summaries | Complex, custom analytics |
+| Output | In-memory or temporary | Stored as collection |
 
----
-
-### ✅ **Conclusion**
-
-The practical demonstrated:
-
-* The working of Map-Reduce for aggregation.
-* Aggregation pipelines as efficient analytical tools.
-* The creation, usage, and impact of indexes on performance.
-
-MongoDB’s Aggregation Framework and Indexing techniques enable high-speed analytical operations and optimized data access.
+Modern MongoDB prefers **aggregation pipelines** since they are faster, more concise, and optimized internally.
 
 ---
 
-## 📚 **References**
-
-* [MongoDB Official Documentation](https://www.mongodb.com/docs/)
-* MongoDB Aggregation Framework Manual
-* MongoDB CRUD Operations Guide
+#### **3. Indexing Review**
+Indexes can also improve Map-Reduce and Aggregation queries by minimizing disk I/O and allowing efficient key-based lookups.
 
 ---
 
-**Prepared by:** Ashwin
-**Course:** B.E. IT — Advanced Database Management Systems (ADBMS)
-**Tool Used:** MongoDB 8.2, Mongosh 2.5.8
-
-```
+### 📗 **Conclusion**
+Map-Reduce and Aggregation operations in MongoDB demonstrate how data processing and summarization can be achieved within the database engine itself, reducing the need for external computation tools.  
+With indexing, these operations become scalable and performant for both transactional and analytical workloads.
 
 ---
 
-✅ You can copy the above text **as-is** and save it as  
-`ADBMS_MongoDB_Practicals.md` — it’s formatted, complete, and submission-ready.  
+## 🧩 **Comparative Overview**
 
-Would you like me to add **diagrams placeholders** (like aggregation pipeline, index structure, and Map-Reduce flow) to make it even more presentation-ready?
-```
+| Concept | Purpose | Key Functions | Performance Benefit |
+|----------|----------|----------------|---------------------|
+| CRUD | Data creation and manipulation | `insert`, `update`, `find`, `delete` | Fundamental data handling |
+| Aggregation | Data summarization and transformation | `$group`, `$project`, `$sum`, `$sort` | Fast in-memory computations |
+| Indexing | Query optimization | `createIndex()`, `.explain()` | Reduces search time |
+| Map-Reduce | Key-value based aggregation | `map()`, `reduce()` | Complex analytical processing |
+
+---
+
+## 🧠 **Key Takeaways**
+- MongoDB’s document model allows flexible, schema-less data representation.  
+- CRUD operations enable dynamic interaction with collections.  
+- The Aggregation Framework provides structured analytics capabilities inside the database.  
+- Indexes significantly improve query performance.  
+- Map-Reduce demonstrates the ability of MongoDB to handle large-scale data processing.
+
+---
+
+
