@@ -1,0 +1,24 @@
+# 1. Create a Single-Field Index
+db.sales_data.createIndex({ cust_id: 1 })
+
+# 2. Create a Compound Index (on region and amount)
+db.sales_data.createIndex({ region: 1, amount: -1 })
+
+# 3. List All Indexes
+db.sales_data.getIndexes()
+
+# 4. Demonstrate Index Advantage
+# Query without index (if index dropped)
+db.sales_data.dropIndexes()
+db.sales_data.find({ cust_id: "C001" }).explain("executionStats")
+
+# Recreate index and rerun same query
+db.sales_data.createIndex({ cust_id: 1 })
+db.sales_data.find({ cust_id: "C001" }).explain("executionStats")
+
+# Observation:
+# The query planner shows fewer documents scanned and faster execution time.
+# Index reduces full collection scans and improves query performance.
+
+# 5. Drop an Index
+db.sales_data.dropIndex({ region: 1, amount: -1 })
