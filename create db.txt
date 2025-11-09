@@ -1,0 +1,91 @@
+# -------------------------------------------
+# Step 1: Create and select database
+# -------------------------------------------
+use college_db
+
+# -------------------------------------------
+# Step 2: Create collection
+# -------------------------------------------
+db.createCollection("teacher_info")
+
+# -------------------------------------------
+# Step 3: Insert multiple (batch) documents
+# -------------------------------------------
+db.teacher_info.insertMany([
+  {teacher_id: "T001", teacher_name: "Priyanka", dept_name: "IT", status: "A", sal: 45000},
+  {teacher_id: "T002", teacher_name: "Pradnya", dept_name: "IT", status: "A", sal: 40000},
+  {teacher_id: "T003", teacher_name: "Seema", dept_name: "IT", status: "N", sal: 30000},
+  {teacher_id: "T004", teacher_name: "Nikhil", dept_name: "ETC", status: "A", sal: 38000},
+  {teacher_id: "T005", teacher_name: "Rohan", dept_name: "COMP", status: "N", sal: 25000}
+])
+
+# -------------------------------------------
+# Step 4: Display all documents
+# -------------------------------------------
+db.teacher_info.find().pretty()
+
+# -------------------------------------------
+# Step 5: Insert validation example
+# (Avoid inserting a document missing required fields)
+# -------------------------------------------
+db.teacher_info.insertOne({teacher_id: "T006", teacher_name: "Sonal", sal: 35000})  # valid
+# If schema validation is defined, missing fields can be restricted (not required here)
+
+# -------------------------------------------
+# Step 6: Update Operations
+# -------------------------------------------
+
+# (a) Update one document
+db.teacher_info.updateOne({teacher_id: "T005"}, {$set: {dept_name: "CIVIL"}})
+
+# (b) Update multiple documents using a modifier
+db.teacher_info.updateMany({status: "A"}, {$inc: {sal: 5000}})
+
+# (c) Upsert example (insert if not exists)
+db.teacher_info.updateOne(
+  {teacher_id: "T010"},
+  {$set: {teacher_name: "Neha", dept_name: "MECH", status: "A", sal: 32000}},
+  {upsert: true}
+)
+
+# -------------------------------------------
+# Step 7: Remove Operation
+# -------------------------------------------
+db.teacher_info.deleteOne({teacher_id: "T003"})
+
+# -------------------------------------------
+# Step 8: Query Demonstrations (at least 10)
+# -------------------------------------------
+
+# 1. Find all documents
+db.teacher_info.find()
+
+# 2. Find one document with a specific value
+db.teacher_info.findOne({teacher_name: "Priyanka"})
+
+# 3. Query using conditionals ($gt)
+db.teacher_info.find({sal: {$gt: 40000}})
+
+# 4. Query using $lt and $ne
+db.teacher_info.find({sal: {$lt: 40000, $ne: 25000}})
+
+# 5. OR query
+db.teacher_info.find({$or: [{status: "A"}, {dept_name: "COMP"}]})
+
+# 6. $not query
+db.teacher_info.find({sal: {$not: {$gt: 40000}}})
+
+# 7. Type-specific: Regular Expression query (names starting with P)
+db.teacher_info.find({teacher_name: {$regex: /^P/}})
+
+# 8. Type-specific: Null query (if any)
+db.teacher_info.find({dept_name: null})
+
+# 9. $where query (custom JavaScript condition)
+db.teacher_info.find({$where: "this.sal > 35000 && this.status == 'A'"})
+
+# 10. Cursor operations — sorting and limiting
+db.teacher_info.find().sort({sal: -1}).limit(3)
+
+# Additional: Skipping results
+db.teacher_info.find().skip(2).limit(2)
